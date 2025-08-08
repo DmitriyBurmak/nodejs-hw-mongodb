@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
 import { contactsRouter } from './routers/contacts.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
 
 const logger = pino();
 
@@ -23,6 +25,10 @@ export function setupServer() {
       message: 'Not found',
     });
   });
+
+  app.use(notFoundHandler);
+
+  app.use(errorHandler);
 
   const server = app.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);
