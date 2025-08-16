@@ -7,11 +7,19 @@ export const getAllContacts = async ({
   perPage = 10,
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
+  filter = {},
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
+  const filterQuery = {};
+  if (filter.contactType) {
+    filterQuery.contactType = filter.contactType;
+  }
+  if (filter.isFavourite) {
+    filterQuery.isFavourite = filter.isFavourite;
+  }
 
-  const contactsQuery = Contact.find();
+  const contactsQuery = Contact.find(filterQuery);
 
   const [contactsCount, contacts] = await Promise.all([
     Contact.countDocuments(),
