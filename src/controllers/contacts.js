@@ -14,13 +14,14 @@ export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
   const filter = parseFilterParams(req.query);
+  const userId = req.user._id;
   const { data, ...paginationData } = await getAllContacts({
     page,
     perPage,
     sortBy,
     sortOrder,
     filter,
-    userId: req.user._id,
+    userId,
   });
 
   res.json({
@@ -31,8 +32,7 @@ export const getContactsController = async (req, res) => {
 };
 
 export const getContactByIdController = async (req, res, next) => {
-  const { contactId } = req.params;
-  const contact = await getContactById(contactId, req.user._id);
+  const contact = await getContactById(req.params.contactId, req.user._id);
 
   if (!contact) {
     throw createHttpError(404, 'Contact not found');
@@ -40,7 +40,7 @@ export const getContactByIdController = async (req, res, next) => {
 
   res.status(200).json({
     status: 200,
-    message: `Successfully found contact with id ${contactId}!`,
+    message: `Successfully found contact with id ${req.params.contactId}!`,
     data: contact,
   });
 };
@@ -56,9 +56,8 @@ export const createContactController = async (req, res, next) => {
 };
 
 export const patchContactController = async (req, res, next) => {
-  const { contactId } = req.params;
   const userId = req.user._id;
-  const result = await patchContact(contactId, userId, req.body, {
+  const result = await patchContact(req.params.contactId, userId, req.body, {
     upsert: true,
   });
 
@@ -74,9 +73,8 @@ export const patchContactController = async (req, res, next) => {
 };
 
 export const deleteContactController = async (req, res, next) => {
-  const { contactId } = req.params;
   const userId = req.user._id;
-  const result = await deleteContact(contactId, userId);
+  const result = await deleteContact(req.params.contactId, userId);
   if (!result) {
     throw createHttpError(404, 'Contact not found');
   }
