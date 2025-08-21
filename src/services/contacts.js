@@ -12,11 +12,17 @@ export const getAllContacts = async ({
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
-  const filterQuery = { userId, ...filter };
-  const contactsQuery = Contact.find(filterQuery);
+
+  const contactsQuery = Contact.find({ userId });
+  if (filter.isFavourite) {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+  }
+  if (filter.type) {
+    contactsQuery.where('contactType').equals(filter.type);
+  }
 
   const [contactsCount, contacts] = await Promise.all([
-    Contact.countDocuments(filterQuery),
+    Contact.countDocuments({ userId, ...filter }),
     contactsQuery
       .skip(skip)
       .limit(limit)
