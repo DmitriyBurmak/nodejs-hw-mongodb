@@ -4,6 +4,13 @@ import { Users } from '../models/user.js';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
 import { Session } from '../models/session.js';
 import { randomBytes } from 'crypto';
+import jwt from 'jsonwebtoken';
+import { getEnvVar } from '../utils/getEnvVar.js';
+import { sendEmail } from '../utils/sendMail.js';
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { TEMPLATES_DIR } from '../constants/index.js';
 
 export const registerUser = async (payload) => {
   const user = await Users.findOne({ email: payload.email });
@@ -83,4 +90,75 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
 
 export const logoutUser = async (sessionId) => {
   await Session.deleteOne({ _id: sessionId });
+};
+
+export const requestResetToken = async (email) => {
+  const user = await Users.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    getEnvVar('JWT_SECRET'),
+    {
+      expiresIn: '5m',
+    },
+  );
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+
+  try {
+    const templateSource = (
+      await fs.readFile(resetPasswordTemplatePath)
+    ).toString();
+    const template = handlebars.compile(templateSource);
+    const html = template({
+      name: user.name,
+      link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+    });
+
+    await sendEmail({
+      from: getEnvVar('SMTP_FROM'),
+      to: email,
+      subject: 'Reset your password',
+      html,
+    });
+  } catch (err) {
+    console.error('Failed to send email:', err);
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
+};
+
+export const resetPassword = async (payload) => {
+  let entries;
+
+  try {
+    entries = jwt.verify(payload.token, getEnvVar('JWT_SECRET'));
+  } catch (err) {
+    if (err instanceof Error) throw createHttpError(401, err.message);
+    throw err;
+  }
+
+  const user = await Users.findOne({
+    email: entries.email,
+    _id: entries.sub,
+  });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
+
+  await Users.updateOne({ _id: user._id }, { password: encryptedPassword });
 };

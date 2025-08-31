@@ -1,12 +1,12 @@
-import dotenv from 'dotenv';
-import { startServer } from './server.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
-
-dotenv.config();
+import { startServer } from './server.js';
+import { createDirIfNotExists } from './utils/createDirIfNotExists.js';
+import { UPLOAD_DIR } from './constants/index.js';
 
 const bootstrap = async () => {
   await initMongoConnection();
+  await createDirIfNotExists(UPLOAD_DIR);
   startServer();
 };
 
-bootstrap();
+void bootstrap();
