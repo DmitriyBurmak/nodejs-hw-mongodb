@@ -7,6 +7,10 @@ import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
 import { getEnvVar } from '../utils/getEnvVar.js';
 import { sendEmail } from '../utils/sendMail.js';
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { TEMPLATES_DIR } from '../constants/index.js';
 
 export const registerUser = async (payload) => {
   const user = await Users.findOne({ email: payload.email });
@@ -93,6 +97,7 @@ export const requestResetToken = async (email) => {
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
+
   const resetToken = jwt.sign(
     {
       sub: user._id,
@@ -103,19 +108,27 @@ export const requestResetToken = async (email) => {
       expiresIn: '5m',
     },
   );
-  const resetPasswordLink = `${getEnvVar(
-    'APP_DOMAIN',
-  )}/reset-password?token=${resetToken}`;
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
 
   try {
+    const templateSource = (
+      await fs.readFile(resetPasswordTemplatePath)
+    ).toString();
+    const template = handlebars.compile(templateSource);
+    const html = template({
+      name: user.name,
+      link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+    });
+
     await sendEmail({
       from: getEnvVar('SMTP_FROM'),
       to: email,
-      subject: 'Скидання паролю',
-      html: `<p>Привіт, ${user.name},</p>
-        <p>Натисніть на посилання нижче, щоб скинути ваш пароль:</p>
-        <a href="${resetPasswordLink}">Скинути пароль</a>
-        <p>Посилання дійсне протягом 5 хвилин.</p>`,
+      subject: 'Reset your password',
+      html,
     });
   } catch (err) {
     console.error('Failed to send email:', err);
