@@ -4,6 +4,9 @@ import { Users } from '../models/user.js';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/index.js';
 import { Session } from '../models/session.js';
 import { randomBytes } from 'crypto';
+import jwt from 'jsonwebtoken';
+import { getEnvVar } from '../utils/getEnvVar.js';
+import { sendEmail } from '../utils/sendMail.js';
 
 export const registerUser = async (payload) => {
   const user = await Users.findOne({ email: payload.email });
@@ -83,4 +86,42 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
 
 export const logoutUser = async (sessionId) => {
   await Session.deleteOne({ _id: sessionId });
+};
+
+export const requestResetToken = async (email) => {
+  const user = await Users.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    getEnvVar('JWT_SECRET'),
+    {
+      expiresIn: '5m',
+    },
+  );
+  const resetPasswordLink = `${getEnvVar(
+    'APP_DOMAIN',
+  )}/reset-password?token=${resetToken}`;
+
+  try {
+    await sendEmail({
+      from: getEnvVar('SMTP_FROM'),
+      to: email,
+      subject: 'Скидання паролю',
+      html: `<p>Привіт, ${user.name},</p>
+        <p>Натисніть на посилання нижче, щоб скинути ваш пароль:</p>
+        <a href="${resetPasswordLink}">Скинути пароль</a>
+        <p>Посилання дійсне протягом 5 хвилин.</p>`,
+    });
+  } catch (err) {
+    console.error('Failed to send email:', err);
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
 };
