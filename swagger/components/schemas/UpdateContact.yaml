@@ -1,0 +1,12 @@
+type: object
+properties:
+  name:
+    type: string
+    example: Jane Doe
+  email:
+    type: string
+    format: email
+    example: jane.doe@example.com
+  phone:
+    type: string
+    example: '+380501234568'

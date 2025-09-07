@@ -1,0 +1,46 @@
+summary: Get all contacts
+operationId: getAllContacts
+tags:
+  - Contacts
+security:
+  - bearerAuth: []
+parameters:
+  - name: name
+    in: query
+    description: Filter contacts by name
+    required: false
+    schema:
+      type: string
+  - name: email
+    in: query
+    description: Filter contacts by email
+    required: false
+    schema:
+      type: string
+  - name: limit
+    in: query
+    description: The number of items to return
+    required: false
+    schema:
+      type: integer
+      default: 10
+      example: 10
+  - name: page
+    in: query
+    description: The page number to retrieve
+    required: false
+    schema:
+      type: integer
+      default: 1
+      example: 1
+responses:
+  '200':
+    description: A list of contacts was successfully retrieved.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../components/schemas/contact.yaml'
+  '404':
+    $ref: '../../components/responses/404.yaml'

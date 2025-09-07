@@ -1,0 +1,32 @@
+summary: Register a new user
+operationId: registerUser
+tags:
+  - Auth
+security: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../../components/schemas/AuthRequest.yaml'
+responses:
+  '200':
+    description: User registered successfully
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Registration successful!
+  '400':
+    description: Bad Request
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Missing required fields
