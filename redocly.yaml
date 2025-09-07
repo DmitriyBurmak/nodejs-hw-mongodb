@@ -5,11 +5,12 @@ extends:
   - recommended
 rules:
   no-unused-components: error
-theme:
-  htmlTemplate: ./docs/index.html
-  colors:
-    primary:
-      main: '#32329f'
+features:
+  theme:
+    htmlTemplate: ./docs/index.html
+    colors:
+      primary:
+        main: '#32329f'
   generateCodeSamples:
     languages:
       - lang: curl
