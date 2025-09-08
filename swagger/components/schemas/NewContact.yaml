@@ -1,15 +1,27 @@
 type: object
 required:
   - name
-  - email
+  - phoneNumber
+  - contactType
 properties:
   name:
     type: string
     example: Jane Doe
+  phoneNumber:
+    type: string
+    example: '+380501234568'
   email:
     type: string
     format: email
     example: jane.doe@example.com
-  phone:
+  isFavourite:
+    type: boolean
+    example: false
+  contactType:
     type: string
-    example: '+380501234568'
+    enum: ['work', 'home', 'personal']
+    example: personal
+  photo:
+    type: string
+    format: binary
+    description: The contact's photo file.
