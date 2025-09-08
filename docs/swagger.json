@@ -115,7 +115,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/NewContact"
               }
@@ -226,7 +226,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateContact"
               }
@@ -422,21 +422,40 @@
         "type": "object",
         "required": [
           "name",
-          "email"
+          "phoneNumber",
+          "contactType"
         ],
         "properties": {
           "name": {
             "type": "string",
             "example": "Jane Doe"
           },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+380501234568"
+          },
           "email": {
             "type": "string",
             "format": "email",
             "example": "jane.doe@example.com"
           },
-          "phone": {
+          "isFavourite": {
+            "type": "boolean",
+            "example": false
+          },
+          "contactType": {
             "type": "string",
-            "example": "+380501234568"
+            "enum": [
+              "work",
+              "home",
+              "personal"
+            ],
+            "example": "personal"
+          },
+          "photo": {
+            "type": "string",
+            "format": "binary",
+            "description": "The contact's photo file."
           }
         }
       },
@@ -447,14 +466,32 @@
             "type": "string",
             "example": "Jane Doe"
           },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+380501234568"
+          },
           "email": {
             "type": "string",
             "format": "email",
             "example": "jane.doe@example.com"
           },
-          "phone": {
+          "isFavourite": {
+            "type": "boolean",
+            "example": false
+          },
+          "contactType": {
             "type": "string",
-            "example": "+380501234568"
+            "enum": [
+              "work",
+              "home",
+              "personal"
+            ],
+            "example": "personal"
+          },
+          "photo": {
+            "type": "string",
+            "format": "binary",
+            "description": "The contact's new photo file."
           }
         }
       },
@@ -482,9 +519,8 @@
         "required": [
           "_id",
           "name",
-          "age",
-          "gender",
-          "onDuty"
+          "phoneNumber",
+          "contactType"
         ],
         "properties": {
           "_id": {
@@ -497,27 +533,30 @@
             "type": "string",
             "example": "John Doe"
           },
-          "age": {
-            "description": "Contact's age",
-            "type": "number",
-            "example": 12
-          },
-          "gender": {
-            "description": "Contact's age",
+          "phoneNumber": {
             "type": "string",
-            "enum": [
-              "male",
-              "female",
-              "other"
-            ]
+            "example": "+380501234568"
           },
-          "onDuty": {
-            "description": "Whether is contact on duty",
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "isFavourite": {
             "type": "boolean",
             "example": false
           },
-          "parentId": {
-            "description": "Contact's parent id",
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "work",
+              "home",
+              "personal"
+            ],
+            "example": "personal"
+          },
+          "userId": {
+            "description": "Contact's owner id",
             "type": "string",
             "example": "65e4decdd286b30065d54af9"
           },
