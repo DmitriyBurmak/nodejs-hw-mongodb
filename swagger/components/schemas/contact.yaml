@@ -2,9 +2,8 @@ type: object
 required:
   - _id
   - name
-  - age
-  - gender
-  - onDuty
+  - phoneNumber
+  - contactType
 properties:
   _id:
     description: "Contact's id"
@@ -14,20 +13,22 @@ properties:
     description: "Contact's name"
     type: string
     example: 'John Doe'
-  age:
-    description: "Contact's age"
-    type: number
-    example: 12
-  gender:
-    description: "Contact's age"
+  phoneNumber:
     type: string
-    enum: ['male', 'female', 'other']
-  onDuty:
-    description: 'Whether is contact on duty'
+    example: '+380501234568'
+  email:
+    type: string
+    format: email
+    example: john.doe@example.com
+  isFavourite:
     type: boolean
     example: false
-  parentId:
-    description: "Contact's parent id"
+  contactType:
+    type: string
+    enum: ['work', 'home', 'personal']
+    example: personal
+  userId:
+    description: "Contact's owner id"
     type: string
     example: 65e4decdd286b30065d54af9
   photo:
